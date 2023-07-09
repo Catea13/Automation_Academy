@@ -10,19 +10,12 @@ public class LoginPage {
     public WebElement usernameField;
     @FindBy(id = "password")
     public WebElement passwordField;
+    @FindBy(id="login-button")
+    public WebElement loginButton;
     public LoginPage(WebDriver driver) {
         this.driver = driver;
     }
-    public void typeInUserNameField(String name) {
-        usernameField.sendKeys(name);
-    }
-
-    public void typeInUserPasswordField(String password) {
-        passwordField.sendKeys(password);
 
 
     }
-
-}
-
 

@@ -19,8 +19,8 @@ public class Hook {
     public Hook() throws IOException {
         BufferedReader reader;
         reader = new BufferedReader(new FileReader(path));
-        properties=new Properties();
-         properties.load(reader);
+        properties = new Properties();
+        properties.load(reader);
         reader.close();
 
     }
