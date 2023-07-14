@@ -1,6 +1,6 @@
 Feature: CheckOut
 
-  Scenario: Check that the checkout is possible
+  Scenario : Check that the checkout is possible
     When    fill in "Name" with "standard_user"
     And  fill in "Password" with "secret_sauce"
     And  click  "Login" button
@@ -10,8 +10,8 @@ Feature: CheckOut
     And fill in "First Name" with "Ecaterina"
     And fill in "Last Name" with "H"
     And fill in "Zip/Postal Code" with "1234"
-    And the user fills out the questionnaire "Checkout" with following data
-    Examples:
+    And the user fills out the questionnaire Checkout with following data
+     Example:
       | field           | value     |
       | First Name      | Ecaterina |
       | Last Name       | H         |
