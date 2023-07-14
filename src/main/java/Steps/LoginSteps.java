@@ -25,8 +25,8 @@ public class LoginSteps {
             case "Password":
                 loginPage.passwordField.sendKeys(value);
                 break;
-            default:
-                System.out.println("This field" + field + " " + "not existed");
+//            default:
+//                System.out.println("This field" + field + " " + "not existed");
 
         }
     }
@@ -38,6 +38,8 @@ public class LoginSteps {
             case "Login":
                 loginPage.loginButton.click();
                 break;
+            default:
+                System.out.println("This button" + button+" "+ "not existed");
         }
     }
 }

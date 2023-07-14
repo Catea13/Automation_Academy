@@ -12,10 +12,9 @@ public class LoginPage {
     public WebElement passwordField;
     @FindBy(id="login-button")
     public WebElement loginButton;
+
     public LoginPage(WebDriver driver) {
         this.driver = driver;
     }
-
-
     }
 
