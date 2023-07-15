@@ -1,4 +1,3 @@
-
 package Hook;
 
 
@@ -6,20 +5,19 @@ import io.cucumber.java.After;
 import io.cucumber.java.Before;
 
 public class CucumberHook {
-    private TestContext testContext;
+    private Hooks.TestContext testContext;
 
-    public CucumberHook(TestContext testContext) {
+    public CucumberHook(Hooks.TestContext testContext) {
         this.testContext = testContext;
     }
 
     @Before
-    public void setup() {
-        testContext.getHook().start();
+    public void setUp() {
+        testContext.getHook().setup();
     }
 
     @After
-    public void close() {
+    public void tearDown() {
         testContext.getHook().close();
     }
-
 }

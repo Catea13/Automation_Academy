@@ -1,11 +1,12 @@
-package Hook;
+package Hooks;
 
-import java.io.IOException;
+import Hook.Hook;
 
 public class TestContext {
+
     private Hook hook;
 
-    public TestContext() throws IOException {
+    public TestContext() {
         hook = new Hook();
     }
 

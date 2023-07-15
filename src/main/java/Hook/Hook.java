@@ -1,9 +1,19 @@
 package Hook;
 
+
+import io.cucumber.java.After;
+import io.cucumber.java.AfterAll;
+import io.cucumber.java.Before;
+import io.cucumber.java.BeforeAll;
+import io.cucumber.java.en.And;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.AfterSuite;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.BeforeSuite;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -13,19 +23,35 @@ import java.util.Properties;
 
 public class Hook {
     public WebDriver driver;
+
     private Properties properties;
-    private final String path = "src/main/java/Config/config.properties";
+    private final String propertyFilePath = "src/main/java/Config/config.properties";
 
-    public Hook() throws IOException {
+    /**
+     * read data from config file
+     **/
+    public Hook() {
         BufferedReader reader;
-        reader = new BufferedReader(new FileReader(path));
-        properties = new Properties();
-        properties.load(reader);
-        reader.close();
-
+        try {
+            reader = new BufferedReader(new FileReader(propertyFilePath));
+            properties = new Properties();
+            try {
+                properties.load(reader);
+                reader.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            throw new RuntimeException("config.properties not found at " + propertyFilePath);
+        }
     }
 
-    public String getDriver() {
+    // @BeforeSuite
+//   @Before
+    @BeforeMethod
+    /**pattern singleton*/
+    public String getDriverPath() {
         String browser = properties.getProperty("browser");
         if (browser.equals("chrome")) {
             WebDriverManager.chromedriver().setup();
@@ -34,7 +60,7 @@ public class Hook {
             WebDriverManager.firefoxdriver().setup();
             driver = new FirefoxDriver();
         } else {
-            System.out.println("This browser not existed");
+            System.out.println("browser not existed");
         }
         driver.manage().window().fullscreen();
         String url = properties.getProperty("url");
@@ -43,13 +69,18 @@ public class Hook {
 
     }
 
-    public void start() {
-        String browser = getDriver();
-        getDriver();
+    public void setup() {
+        String browser = getDriverPath();
+
+        getDriverPath();
+
     }
 
+
+    //@After
+    @AfterMethod
     public void close() {
         driver.quit();
-    }
 
+    }
 }
