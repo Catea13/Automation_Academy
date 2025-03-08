@@ -23,25 +23,13 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
 
-      - name: Install Dependencies
+      - name: Verify ChromeDriver and Google Chrome Installation
         run: |
-          # Обновляем пакеты и устанавливаем необходимые утилиты
-          sudo apt-get update
-          sudo apt-get install -y wget unzip google-chrome-stable
-
-          # Получаем версию установленного Google Chrome
-          CHROME_VERSION=$(google-chrome --version | sed 's/Google Chrome \(.*\)\..*/\1/')
-
-          # Получаем соответствующую версию ChromeDriver для установленной версии Chrome
-          DRIVER_VERSION=$(wget -qO- "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${CHROME_VERSION}")
-
-          # Скачиваем и распаковываем ChromeDriver
-          wget "https://chromedriver.storage.googleapis.com/${DRIVER_VERSION}/chromedriver_linux64.zip"
-          unzip chromedriver_linux64.zip
-          sudo mv chromedriver /usr/local/bin/
-
-          # Делаем chromedriver исполнимым
-          sudo chmod +x /usr/local/bin/chromedriver
+          # Проверка, что Google Chrome установлен
+          google-chrome --version || { echo "Google Chrome is not installed"; exit 1; }
+          
+          # Проверка, что chromedriver установлен
+          chromedriver --version || { echo "ChromeDriver is not installed"; exit 1; }
 
       - name: Run Cucumber tests with Maven
         run: mvn clean test
