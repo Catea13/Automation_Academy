@@ -45,33 +45,39 @@ public class Hook {
         String browser = properties.getProperty("browser");
         String env = properties.getProperty("env");
 
-        // Set browser options based on configuration
-        if (browser.equals("chrome")) {
-            // Устанавливаем браузер и его опции
-            Configuration.browser = "chrome";
-            ChromeOptions options = new ChromeOptions();
+        // Set browser options based on configuration{
+            if (browser.equals("chrome")) {
+                // Устанавливаем браузер и его опции
+                Configuration.browser = "chrome";
+                ChromeOptions options = new ChromeOptions();
 
-            // Очищаем все прокси настройки (не используем прокси)
-            options.addArguments("--headless");
-            options.addArguments("--disable-gpu");
-            options.addArguments("--no-sandbox");
+                // Убираем headless режим, чтобы тесты запускались с интерфейсом
+                Configuration.headless = false;  // Отключаем headless режим
 
-            // Убираем headless режим, чтобы тесты запускались с интерфейсом
-            Configuration.headless = false;
+                // Указываем уникальную директорию для пользовательских данных
+                String userDataDir = System.getProperty("user.dir") + "/chromeUserData";
+                options.addArguments("user-data-dir=" + userDataDir);  // Устанавливаем уникальную директорию данных
 
-            // Используем WebDriverManager для автоматической настройки драйвера
-            WebDriverManager.chromedriver().setup();  // Это автоматически настроит драйвер
+                // Добавляем аргументы для Chrome
+                options.addArguments("start-maximized"); // Открыть браузер на полный экран
+                options.addArguments("--disable-dev-shm-usage"); // Отключение использования /dev/shm
+                options.addArguments("--disable-browser-side-navigation"); // Отключение побочной навигации
+                options.addArguments("--disable-gpu"); // Отключение использования GPU
+                options.addArguments("disable-infobars"); // Отключение инфобара
+                options.addArguments("--disable-extensions"); // Отключение расширений
 
-            // Дополнительная конфигурация Selenide
-            Configuration.browserSize = "1366x768"; // Размер окна браузера
-            Configuration.pageLoadStrategy = "normal";
-            Configuration.timeout = 17000; // Время ожидания
-            Configuration.reportsFolder = "target/screenshots"; // Папка для отчетов
-            Configuration.browserCapabilities = options;
-            options.setExperimentalOption("mobileEmulation", Map.of("deviceName", "Samsung Galaxy A51/71"));
-        }
+                // Настройки WebDriverManager для автоматической установки драйвера
+                WebDriverManager.chromedriver().setup();  // Автоматическая настройка драйвера
 
-    else if (browser.equals("edge")) {
+                // Дополнительные параметры для Selenide
+                Configuration.browserSize = "1366x768";  // Устанавливаем размер окна браузера
+                Configuration.pageLoadStrategy = "normal";  // Устанавливаем стратегию загрузки страниц
+                Configuration.timeout = 17000;  // Время ожидания в миллисекундах
+                Configuration.reportsFolder = "target/screenshots";  // Папка для отчетов
+                Configuration.browserCapabilities = options;  // Устанавливаем capabilities для браузера
+            }
+
+            else if (browser.equals("edge")) {
                 WebDriverManager.edgedriver().setup();  // Set up Edge driver
                 Configuration.browser = "edge";
                 EdgeOptions edgeOptions = new EdgeOptions();
