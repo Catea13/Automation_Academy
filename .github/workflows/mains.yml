@@ -27,13 +27,16 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y wget unzip
 
-      - name: Install ChromeDriver (latest version)
-        run: |
-          CHROMEDRIVER_VERSION=$(curl -sS https://chromedriver.storage.googleapis.com/LATEST_RELEASE)
-          wget https://chromedriver.storage.googleapis.com/${CHROMEDRIVER_VERSION}/chromedriver_linux64.zip
-          unzip chromedriver_linux64.zip
-          sudo mv chromedriver /usr/local/bin/
-          chmod +x /usr/local/bin/chromedriver
+   - name: Install Dependencies
+  run: |
+    sudo apt-get update
+    sudo apt-get install -y wget unzip
+    CHROME_VERSION=$(google-chrome --version | sed 's/Google Chrome \(.*\)\..*/\1/')
+    DRIVER_VERSION=$(wget -qO- "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${CHROME_VERSION}")
+    wget "https://chromedriver.storage.googleapis.com/${DRIVER_VERSION}/chromedriver_linux64.zip"
+    unzip chromedriver_linux64.zip
+    sudo mv chromedriver /usr/local/bin/
+
 
       - name: Run Cucumber tests with Maven
         run: mvn clean test
