@@ -14,8 +14,18 @@ jobs:
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
-          java-version: '21'  # Fixed the indentation here
+          java-version: '21'
+
+      - name: Cache Maven dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2/repository  # Кеширование зависимостей Maven для ускорения сборки
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Install dependencies
+        run: mvn install -DskipTests  # Устанавливаем зависимости без выполнения тестов
 
       - name: Run Cucumber tests with Maven
-        run: |
-          mvn test
+        run: mvn test  # Запуск тестов
