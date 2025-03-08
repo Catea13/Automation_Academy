@@ -40,6 +40,7 @@ public class Hook {
         }
     }
 
+    // Ensure this method is properly opening the browser before proceeding
     public String getDriverPath() {
         String browser = properties.getProperty("browser");
         String env = properties.getProperty("env");
@@ -79,12 +80,14 @@ public class Hook {
 
     @Before
     public void setup() {
+        // Call open(url) to initialize the WebDriver and ensure it's bound to the current thread
         getDriverPath(); // Ensure WebDriver is initialized and URL is opened
     }
 
     @After
     public void close(Scenario scenario) {
         try {
+            // Capture the status of the scenario
             System.out.println(scenario.getName() + " : " + scenario.getStatus());
 
             // Take screenshot if the scenario fails
@@ -96,8 +99,13 @@ public class Hook {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        // Clean up and close the WebDriver session after each test
-        Selenide.closeWebDriver();
-        System.out.println("Driver was closed.");
+
+        // Close the WebDriver session after each test
+        if (WebDriverRunner.hasWebDriverStarted()) {
+            Selenide.closeWebDriver();
+            System.out.println("Driver was closed.");
+        } else {
+            System.out.println("No WebDriver session was started.");
+        }
     }
 }
