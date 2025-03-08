@@ -40,7 +40,6 @@ public class Hook {
         }
     }
 
-    // Ensure this method is properly opening the browser before proceeding
     public String getDriverPath() {
         String browser = properties.getProperty("browser");
         String env = properties.getProperty("env");
@@ -62,7 +61,7 @@ public class Hook {
             WebDriverManager.edgedriver().setup();
             EdgeOptions edgeOptions = new EdgeOptions();
 
-            // Ensure that a unique user data directory is used to avoid conflicts
+            // Generate a unique user data directory for each test run
             String uniqueUserDataDir = "/tmp/selenium/userDataDir_" + System.currentTimeMillis(); // Unique directory for each test run
             edgeOptions.addArguments("--user-data-dir=" + uniqueUserDataDir);  // Set the unique user data directory
             edgeOptions.addArguments("--disable-dev-shm-usage", "--window-size=1366,768"); // Disable dev-shm usage for CI environments
