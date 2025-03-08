@@ -1,15 +1,20 @@
-name: Run Cucumber Tests
+name: Run Cucumber Tests Locally
 
 on:
-  workflow_dispatch:  # Позволяет запускать вручную
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   test:
-    runs-on: ubuntu-latest  # Используется виртуальная машина с Ubuntu
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3  # Проверка кода
+        uses: actions/checkout@v3
 
       - name: Set up JDK 21
         uses: actions/setup-java@v3
@@ -20,12 +25,12 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y wget unzip
+          sudo apt-get install -y wget
           wget https://chromedriver.storage.googleapis.com/133.0.6943.142/chromedriver_linux64.zip
           unzip chromedriver_linux64.zip
-          sudo mv chromedriver /usr/local/bin/  # Устанавливаем ChromeDriver
+          sudo mv chromedriver /usr/local/bin/
 
       - name: Run Cucumber tests with Maven
-        run: mvn clean test  # Запуск тестов через Maven
+        run: mvn clean test
         env:
-          SELENIDE_URL: "https://www.demoblaze.com/"  # URL для тестов
+          SELENIDE_URL: "https://www.demoblaze.com/"
