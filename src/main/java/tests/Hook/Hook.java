@@ -44,41 +44,42 @@ public class Hook {
         String browser = properties.getProperty("browser");
         String env = properties.getProperty("env");
 
-        // Set browser options based on configuration
+        // Set the browser options based on the configuration
         if (browser.equals("chrome")) {
-            WebDriverManager.chromedriver().setup();  // Set up Chrome driver
             Configuration.browser = "chrome";
             ChromeOptions options = new ChromeOptions();
             Configuration.browserSize = "1366x768";
-            Configuration.headless = true;  // Headless mode
+            Configuration.headless = true;  // Run browser in headless mode
             Configuration.pageLoadStrategy = "normal";
             Configuration.timeout = 15000;
             Configuration.reportsFolder = "target/screenshots";
             Configuration.browserCapabilities = options;
         } else if (browser.equals("edge")) {
-            WebDriverManager.edgedriver().setup();  // Set up Edge driver
             Configuration.browser = "edge";
+
+            // Make sure the driver version is up to date
+            WebDriverManager.edgedriver().setup();
             EdgeOptions edgeOptions = new EdgeOptions();
-            Configuration.browserCapabilities = edgeOptions;
+
+            // Ensure that a unique user data directory is used to avoid conflicts
+            String uniqueUserDataDir = "/tmp/selenium/userDataDir_" + System.currentTimeMillis(); // Unique directory for each test run
+            edgeOptions.addArguments("--user-data-dir=" + uniqueUserDataDir);  // Set the unique user data directory
+            edgeOptions.addArguments("--disable-dev-shm-usage", "--window-size=1366,768"); // Disable dev-shm usage for CI environments
             edgeOptions.setExperimentalOption("mobileEmulation", Map.of("deviceName", "Samsung Galaxy A51/71"));
+            Configuration.browserCapabilities = edgeOptions;
         }
 
-        // Open the URL after setting up WebDriver
+        // Open the URL after setting the WebDriver options
         String url = properties.getProperty("url");
-        Selenide.open(url);  // Open URL to initialize WebDriver
-        WebDriverRunner.getWebDriver().manage().window().maximize();  // Maximize window after opening URL
+        Selenide.open(url); // Open the URL to initialize WebDriver
+        WebDriverRunner.getWebDriver().manage().window().maximize(); // Maximize the window after opening the URL
 
         return browser;
     }
 
     @Before
     public void setup() {
-        System.out.println("Initializing WebDriver...");
-        getDriverPath();  // Initialize WebDriver and open the URL
-        if (WebDriverRunner.getWebDriver() == null) {
-            throw new IllegalStateException("WebDriver is not initialized.");
-        }
-        System.out.println("WebDriver successfully initialized.");
+        getDriverPath(); // Ensure WebDriver is initialized and URL is opened
     }
 
     @After
@@ -86,22 +87,17 @@ public class Hook {
         try {
             System.out.println(scenario.getName() + " : " + scenario.getStatus());
 
-            // Take screenshot if test fails
-            String screenshotName = scenario.getName();
+            // Take screenshot if the scenario fails
             if (scenario.isFailed()) {
                 final byte[] screenshot = ((TakesScreenshot) WebDriverRunner.getWebDriver())
                         .getScreenshotAs(OutputType.BYTES);
-                scenario.attach(screenshot, "image/png", screenshotName);
+                scenario.attach(screenshot, "image/png", scenario.getName());
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        // Close WebDriver only if it was started
-        if (WebDriverRunner.hasWebDriverStarted()) {
-            Selenide.closeWebDriver();
-        }
-
+        // Clean up and close the WebDriver session after each test
+        Selenide.closeWebDriver();
         System.out.println("Driver was closed.");
     }
 }
