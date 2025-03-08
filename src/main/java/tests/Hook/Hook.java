@@ -70,11 +70,7 @@ public class Hook {
             Configuration.browserCapabilities = edgeOptions;
         }
 
-        // Открываем URL после того, как WebDriver настроен
-        String url = properties.getProperty("url");
-        Selenide.open(url); // Открываем URL для инициализации WebDriver
-        WebDriverRunner.getWebDriver().manage().window().maximize(); // Максимизируем окно браузера после открытия
-
+        // Возвращаем браузер, но не открываем URL здесь.
         return browser;
     }
 
@@ -82,6 +78,9 @@ public class Hook {
     public void setup() {
         // Запускаем open(url) для инициализации WebDriver и связывания его с текущим потоком
         getDriverPath(); // Убедитесь, что WebDriver инициализирован и URL открыт
+        String url = properties.getProperty("url");
+        Selenide.open(url); // Открываем URL для инициализации WebDriver
+        WebDriverRunner.getWebDriver().manage().window().maximize(); // Максимизируем окно браузера после открытия
     }
 
     @After
