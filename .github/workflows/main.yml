@@ -34,3 +34,4 @@ jobs:
         run: mvn clean test
         env:
           SELENIDE_URL: "https://www.demoblaze.com/"
+          # Here you can set additional environment variables to customize the behavior
