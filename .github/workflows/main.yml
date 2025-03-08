@@ -1,0 +1,49 @@
+name: Run Cucumber Tests Locally
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:  # Добавлено для ручного запуска
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Install Dependencies
+        run: |
+          # Обновляем пакеты и устанавливаем необходимые утилиты
+          sudo apt-get update
+          sudo apt-get install -y wget unzip google-chrome-stable
+
+          # Получаем версию установленного Google Chrome
+          CHROME_VERSION=$(google-chrome --version | sed 's/Google Chrome \(.*\)\..*/\1/')
+
+          # Получаем соответствующую версию ChromeDriver для установленной версии Chrome
+          DRIVER_VERSION=$(wget -qO- "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${CHROME_VERSION}")
+
+          # Скачиваем и распаковываем ChromeDriver
+          wget "https://chromedriver.storage.googleapis.com/${DRIVER_VERSION}/chromedriver_linux64.zip"
+          unzip chromedriver_linux64.zip
+          sudo mv chromedriver /usr/local/bin/
+
+          # Делаем chromedriver исполнимым
+          sudo chmod +x /usr/local/bin/chromedriver
+
+      - name: Run Cucumber tests with Maven
+        run: mvn clean test
+        env:
+          SELENIDE_URL: "https://www.demoblaze.com/"
