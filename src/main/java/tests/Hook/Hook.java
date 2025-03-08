@@ -17,7 +17,7 @@ import java.io.*;
 import java.util.Map;
 import java.util.Properties;
 
-public class  Hook{
+public class Hook {
     public WebDriver driver;
     private Properties properties;
     private final String propertyFilePath = "src/main/java/tests/Config/config.properties";
@@ -44,35 +44,41 @@ public class  Hook{
         String browser = properties.getProperty("browser");
         String env = properties.getProperty("env");
 
-        // Set the browser options based on the configuration
+        // Set browser options based on configuration
         if (browser.equals("chrome")) {
+            WebDriverManager.chromedriver().setup();  // Set up Chrome driver
             Configuration.browser = "chrome";
             ChromeOptions options = new ChromeOptions();
             Configuration.browserSize = "1366x768";
-            Configuration.headless = true;
+            Configuration.headless = true;  // Headless mode
             Configuration.pageLoadStrategy = "normal";
             Configuration.timeout = 15000;
             Configuration.reportsFolder = "target/screenshots";
             Configuration.browserCapabilities = options;
         } else if (browser.equals("edge")) {
+            WebDriverManager.edgedriver().setup();  // Set up Edge driver
             Configuration.browser = "edge";
-            WebDriverManager.edgedriver().setup();
             EdgeOptions edgeOptions = new EdgeOptions();
             Configuration.browserCapabilities = edgeOptions;
             edgeOptions.setExperimentalOption("mobileEmulation", Map.of("deviceName", "Samsung Galaxy A51/71"));
         }
 
-        // Open the URL after setting the WebDriver options
+        // Open the URL after setting up WebDriver
         String url = properties.getProperty("url");
-        Selenide.open(url); // Ensure this is called to initialize WebDriver
-        WebDriverRunner.getWebDriver().manage().window().maximize(); // Maximize the window after opening the URL
+        Selenide.open(url);  // Open URL to initialize WebDriver
+        WebDriverRunner.getWebDriver().manage().window().maximize();  // Maximize window after opening URL
 
         return browser;
     }
 
     @Before
     public void setup() {
-        getDriverPath(); // Ensure WebDriver is initialized and URL is opened
+        System.out.println("Initializing WebDriver...");
+        getDriverPath();  // Initialize WebDriver and open the URL
+        if (WebDriverRunner.getWebDriver() == null) {
+            throw new IllegalStateException("WebDriver is not initialized.");
+        }
+        System.out.println("WebDriver successfully initialized.");
     }
 
     @After
@@ -80,6 +86,7 @@ public class  Hook{
         try {
             System.out.println(scenario.getName() + " : " + scenario.getStatus());
 
+            // Take screenshot if test fails
             String screenshotName = scenario.getName();
             if (scenario.isFailed()) {
                 final byte[] screenshot = ((TakesScreenshot) WebDriverRunner.getWebDriver())
@@ -89,7 +96,12 @@ public class  Hook{
         } catch (Exception e) {
             e.printStackTrace();
         }
-        Selenide.closeWebDriver(); // Close the WebDriver after the scenario
-        System.out.println("Driver was closed");
+
+        // Close WebDriver only if it was started
+        if (WebDriverRunner.hasWebDriverStarted()) {
+            Selenide.closeWebDriver();
+        }
+
+        System.out.println("Driver was closed.");
     }
 }
