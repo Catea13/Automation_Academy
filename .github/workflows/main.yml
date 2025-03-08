@@ -16,7 +16,7 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
 
-         - name: Clean previous build
+      - name: Clean previous build
         run: mvn clean  # Очистка предыдущих артефактов сборки
 
       - name: Run Cucumber tests with Maven
