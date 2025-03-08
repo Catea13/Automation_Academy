@@ -7,7 +7,6 @@ on:
   pull_request:
     branches:
       - main
-  workflow_dispatch:  # Добавлено для ручного запуска
 
 jobs:
   test:
@@ -26,10 +25,15 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y wget
-          wget https://chromedriver.storage.googleapis.com/133.0.6943.142/chromedriver_linux64.zip
+          sudo apt-get install -y wget unzip
+
+      - name: Install ChromeDriver (latest version)
+        run: |
+          CHROMEDRIVER_VERSION=$(curl -sS https://chromedriver.storage.googleapis.com/LATEST_RELEASE)
+          wget https://chromedriver.storage.googleapis.com/${CHROMEDRIVER_VERSION}/chromedriver_linux64.zip
           unzip chromedriver_linux64.zip
           sudo mv chromedriver /usr/local/bin/
+          chmod +x /usr/local/bin/chromedriver
 
       - name: Run Cucumber tests with Maven
         run: mvn clean test
