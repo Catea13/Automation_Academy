@@ -1,11 +1,12 @@
-name: Run Cucumber Tests Manually
+name: Run Cucumber Tests
 
 on:
-  workflow_dispatch:  # Позволяет запускать тесты вручную
+  workflow_dispatch:
 
 jobs:
   test:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -16,8 +17,15 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
 
-      - name: Clean previous build
-        run: mvn clean  # Очистка предыдущих артефактов сборки
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget
+          wget https://chromedriver.storage.googleapis.com/114.0.5735.90/chromedriver_linux64.zip
+          unzip chromedriver_linux64.zip
+          sudo mv chromedriver /usr/local/bin/
 
       - name: Run Cucumber tests with Maven
-        run: mvn test  # Запуск тестов
+        run: mvn test
+        env:
+          SELENIDE_URL: "https://www.demoblaze.com/"
