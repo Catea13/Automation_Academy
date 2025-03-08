@@ -6,6 +6,7 @@ import com.codeborne.selenide.WebDriverRunner;
 import io.cucumber.java.Before;
 import io.cucumber.java.After;
 import io.cucumber.java.Scenario;
+import org.openqa.selenium.Proxy;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.edge.EdgeOptions;
@@ -46,30 +47,48 @@ public class Hook {
 
         // Set browser options based on configuration
         if (browser.equals("chrome")) {
-            WebDriverManager.chromedriver().setup();  // Set up Chrome driver
+            // Устанавливаем браузер и его опции
             Configuration.browser = "chrome";
             ChromeOptions options = new ChromeOptions();
-            Configuration.browserSize = "1366x768";
-            Configuration.headless = true;  // Headless mode
+
+            // Очищаем все прокси настройки (не используем прокси)
+            options.addArguments("start-maximized");
+            options.addArguments("enable-automation");
+            options.addArguments("--disable-dev-shm-usage");
+            options.addArguments("--disable-browser-side-navigation");
+            options.addArguments("--disable-gpu");
+            options.addArguments("disable-infobars");
+            options.addArguments("--disable-extensions");
+
+            // Убираем headless режим, чтобы тесты запускались с интерфейсом
+            Configuration.headless = false;
+
+            // Используем WebDriverManager для автоматической настройки драйвера
+            WebDriverManager.chromedriver().setup();  // Это автоматически настроит драйвер
+
+            // Дополнительная конфигурация Selenide
+            Configuration.browserSize = "1366x768"; // Размер окна браузера
             Configuration.pageLoadStrategy = "normal";
-            Configuration.timeout = 15000;
-            Configuration.reportsFolder = "target/screenshots";
+            Configuration.timeout = 17000; // Время ожидания
+            Configuration.reportsFolder = "target/screenshots"; // Папка для отчетов
             Configuration.browserCapabilities = options;
-        } else if (browser.equals("edge")) {
-            WebDriverManager.edgedriver().setup();  // Set up Edge driver
-            Configuration.browser = "edge";
-            EdgeOptions edgeOptions = new EdgeOptions();
-            Configuration.browserCapabilities = edgeOptions;
-            edgeOptions.setExperimentalOption("mobileEmulation", Map.of("deviceName", "Samsung Galaxy A51/71"));
         }
 
-        // Open the URL after setting up WebDriver
-        String url = properties.getProperty("url");
-        Selenide.open(url);  // Open URL to initialize WebDriver
-        WebDriverRunner.getWebDriver().manage().window().maximize();  // Maximize window after opening URL
+    else if (browser.equals("edge")) {
+                WebDriverManager.edgedriver().setup();  // Set up Edge driver
+                Configuration.browser = "edge";
+                EdgeOptions edgeOptions = new EdgeOptions();
+                Configuration.browserCapabilities = edgeOptions;
+                edgeOptions.setExperimentalOption("mobileEmulation", Map.of("deviceName", "Samsung Galaxy A51/71"));
+            }
 
-        return browser;
-    }
+            // Open the URL after setting up WebDriver
+            String url = properties.getProperty("url");
+            Selenide.open(url);  // Open URL to initialize WebDriver
+            WebDriverRunner.getWebDriver().manage().window().maximize();  // Maximize window after opening URL
+
+            return browser;
+        }
 
     @Before
     public void setup() {
