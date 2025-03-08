@@ -52,13 +52,9 @@ public class Hook {
             ChromeOptions options = new ChromeOptions();
 
             // Очищаем все прокси настройки (не используем прокси)
-            options.addArguments("start-maximized");
-            options.addArguments("enable-automation");
-            options.addArguments("--disable-dev-shm-usage");
-            options.addArguments("--disable-browser-side-navigation");
+            options.addArguments("--headless");
             options.addArguments("--disable-gpu");
-            options.addArguments("disable-infobars");
-            options.addArguments("--disable-extensions");
+            options.addArguments("--no-sandbox");
 
             // Убираем headless режим, чтобы тесты запускались с интерфейсом
             Configuration.headless = false;
