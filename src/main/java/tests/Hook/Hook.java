@@ -16,6 +16,7 @@ import io.github.bonigarcia.wdm.WebDriverManager;
 import java.io.*;
 import java.util.Map;
 import java.util.Properties;
+import java.util.UUID;
 
 public class Hook {
     public WebDriver driver;
@@ -23,7 +24,7 @@ public class Hook {
     private final String propertyFilePath = "src/main/java/tests/Config/config.properties";
 
     public Hook() {
-        // Load the configuration properties
+        // Загружаем конфигурационные параметры
         BufferedReader reader;
         try {
             reader = new BufferedReader(new FileReader(propertyFilePath));
@@ -36,7 +37,7 @@ public class Hook {
             }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
-            throw new RuntimeException("config.properties not found at " + propertyFilePath);
+            throw new RuntimeException("config.properties не найден по пути " + propertyFilePath);
         }
     }
 
@@ -44,12 +45,12 @@ public class Hook {
         String browser = properties.getProperty("browser");
         String env = properties.getProperty("env");
 
-        // Set the browser options based on the configuration
+        // Устанавливаем настройки для выбранного браузера
         if (browser.equals("chrome")) {
             Configuration.browser = "chrome";
             ChromeOptions options = new ChromeOptions();
             Configuration.browserSize = "1366x768";
-            Configuration.headless = true;  // Run browser in headless mode
+            Configuration.headless = true;  // Запускаем браузер в headless режиме
             Configuration.pageLoadStrategy = "normal";
             Configuration.timeout = 15000;
             Configuration.reportsFolder = "target/screenshots";
@@ -57,39 +58,39 @@ public class Hook {
         } else if (browser.equals("edge")) {
             Configuration.browser = "edge";
 
-            // Make sure the driver version is up to date
+            // Настроим WebDriver для Edge
             WebDriverManager.edgedriver().setup();
             EdgeOptions edgeOptions = new EdgeOptions();
 
-            // Generate a unique user data directory for each test run
-            String uniqueUserDataDir = "/tmp/selenium/userDataDir_" + System.currentTimeMillis(); // Unique directory for each test run
-            edgeOptions.addArguments("--user-data-dir=" + uniqueUserDataDir);  // Set the unique user data directory
-            edgeOptions.addArguments("--disable-dev-shm-usage", "--window-size=1366,768"); // Disable dev-shm usage for CI environments
+            // Если необходимо, генерируем уникальный путь для директории данных пользователя
+            String uniqueUserDataDir = "/tmp/selenium/userDataDir_" + UUID.randomUUID().toString(); // Генерация уникального пути
+            edgeOptions.addArguments("--user-data-dir=" + uniqueUserDataDir);  // Используем уникальный путь для данных пользователя
+            edgeOptions.addArguments("--disable-dev-shm-usage", "--window-size=1366,768"); // Отключаем использование dev-shm для CI-среды
             edgeOptions.setExperimentalOption("mobileEmulation", Map.of("deviceName", "Samsung Galaxy A51/71"));
             Configuration.browserCapabilities = edgeOptions;
         }
 
-        // Open the URL after setting the WebDriver options
+        // Открываем URL после того, как WebDriver настроен
         String url = properties.getProperty("url");
-        Selenide.open(url); // Open the URL to initialize WebDriver
-        WebDriverRunner.getWebDriver().manage().window().maximize(); // Maximize the window after opening the URL
+        Selenide.open(url); // Открываем URL для инициализации WebDriver
+        WebDriverRunner.getWebDriver().manage().window().maximize(); // Максимизируем окно браузера после открытия
 
         return browser;
     }
 
     @Before
     public void setup() {
-        // Call open(url) to initialize the WebDriver and ensure it's bound to the current thread
-        getDriverPath(); // Ensure WebDriver is initialized and URL is opened
+        // Запускаем open(url) для инициализации WebDriver и связывания его с текущим потоком
+        getDriverPath(); // Убедитесь, что WebDriver инициализирован и URL открыт
     }
 
     @After
     public void close(Scenario scenario) {
         try {
-            // Capture the status of the scenario
+            // Захват состояния сценария
             System.out.println(scenario.getName() + " : " + scenario.getStatus());
 
-            // Take screenshot if the scenario fails
+            // Делаем скриншот, если тест не прошел
             if (scenario.isFailed()) {
                 final byte[] screenshot = ((TakesScreenshot) WebDriverRunner.getWebDriver())
                         .getScreenshotAs(OutputType.BYTES);
@@ -99,12 +100,12 @@ public class Hook {
             e.printStackTrace();
         }
 
-        // Close the WebDriver session after each test
+        // Закрываем сессию WebDriver после каждого теста
         if (WebDriverRunner.hasWebDriverStarted()) {
             Selenide.closeWebDriver();
-            System.out.println("Driver was closed.");
+            System.out.println("Driver был закрыт.");
         } else {
-            System.out.println("No WebDriver session was started.");
+            System.out.println("Сессия WebDriver не была инициализирована.");
         }
     }
 }
