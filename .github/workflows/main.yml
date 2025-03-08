@@ -16,16 +16,8 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
 
-      - name: Cache Maven dependencies
-        uses: actions/cache@v3
-        with:
-          path: ~/.m2/repository  # Кеширование зависимостей Maven для ускорения сборки
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
-
-      - name: Install dependencies
-        run: mvn install -DskipTests  # Устанавливаем зависимости без выполнения тестов
+         - name: Clean previous build
+        run: mvn clean  # Очистка предыдущих артефактов сборки
 
       - name: Run Cucumber tests with Maven
         run: mvn test  # Запуск тестов
