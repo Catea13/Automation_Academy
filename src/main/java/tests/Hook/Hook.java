@@ -94,6 +94,8 @@ public class Hook {
     @Before
     public void setup() {
         System.out.println("Initializing WebDriver...");
+        String url = properties.getProperty("url");
+        Selenide.open(url);  // Open URL to initialize WebDriver
         getDriverPath();  // Initialize WebDriver and open the URL
         if (WebDriverRunner.getWebDriver() == null) {
             throw new IllegalStateException("WebDriver is not initialized.");
