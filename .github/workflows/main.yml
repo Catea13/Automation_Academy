@@ -18,5 +18,5 @@ jobs:
 
       - name: Run Cucumber tests with Maven
         run: |
-          cd Automation_Academy
+         
           mvn test
