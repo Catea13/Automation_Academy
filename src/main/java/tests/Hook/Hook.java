@@ -16,7 +16,6 @@ import io.github.bonigarcia.wdm.WebDriverManager;
 import java.io.*;
 import java.util.Map;
 import java.util.Properties;
-import java.util.UUID;
 
 public class Hook {
     public WebDriver driver;
@@ -24,7 +23,7 @@ public class Hook {
     private final String propertyFilePath = "src/main/java/tests/Config/config.properties";
 
     public Hook() {
-        // Загружаем конфигурационные параметры
+        // Load the configuration properties
         BufferedReader reader;
         try {
             reader = new BufferedReader(new FileReader(propertyFilePath));
@@ -37,7 +36,7 @@ public class Hook {
             }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
-            throw new RuntimeException("config.properties не найден по пути " + propertyFilePath);
+            throw new RuntimeException("config.properties not found at " + propertyFilePath);
         }
     }
 
@@ -45,66 +44,64 @@ public class Hook {
         String browser = properties.getProperty("browser");
         String env = properties.getProperty("env");
 
-        // Устанавливаем настройки для выбранного браузера
+        // Set browser options based on configuration
         if (browser.equals("chrome")) {
+            WebDriverManager.chromedriver().setup();  // Set up Chrome driver
             Configuration.browser = "chrome";
             ChromeOptions options = new ChromeOptions();
             Configuration.browserSize = "1366x768";
-            Configuration.headless = true;  // Запускаем браузер в headless режиме
+            Configuration.headless = true;  // Headless mode
             Configuration.pageLoadStrategy = "normal";
             Configuration.timeout = 15000;
             Configuration.reportsFolder = "target/screenshots";
             Configuration.browserCapabilities = options;
         } else if (browser.equals("edge")) {
+            WebDriverManager.edgedriver().setup();  // Set up Edge driver
             Configuration.browser = "edge";
-
-            // Настроим WebDriver для Edge
-            WebDriverManager.edgedriver().setup();
             EdgeOptions edgeOptions = new EdgeOptions();
-
-            // Если необходимо, генерируем уникальный путь для директории данных пользователя
-            String uniqueUserDataDir = "/tmp/selenium/userDataDir_" + UUID.randomUUID().toString(); // Генерация уникального пути
-            edgeOptions.addArguments("--user-data-dir=" + uniqueUserDataDir);  // Используем уникальный путь для данных пользователя
-            edgeOptions.addArguments("--disable-dev-shm-usage", "--window-size=1366,768"); // Отключаем использование dev-shm для CI-среды
-            edgeOptions.setExperimentalOption("mobileEmulation", Map.of("deviceName", "Samsung Galaxy A51/71"));
             Configuration.browserCapabilities = edgeOptions;
+            edgeOptions.setExperimentalOption("mobileEmulation", Map.of("deviceName", "Samsung Galaxy A51/71"));
         }
 
-        // Возвращаем браузер, но не открываем URL здесь.
+        // Open the URL after setting up WebDriver
+        String url = properties.getProperty("url");
+        Selenide.open(url);  // Open URL to initialize WebDriver
+        WebDriverRunner.getWebDriver().manage().window().maximize();  // Maximize window after opening URL
+
         return browser;
     }
 
     @Before
     public void setup() {
-        // Запускаем open(url) для инициализации WebDriver и связывания его с текущим потоком
-        getDriverPath(); // Убедитесь, что WebDriver инициализирован и URL открыт
-        String url = properties.getProperty("url");
-        Selenide.open(url); // Открываем URL для инициализации WebDriver
-        WebDriverRunner.getWebDriver().manage().window().maximize(); // Максимизируем окно браузера после открытия
+        System.out.println("Initializing WebDriver...");
+        getDriverPath();  // Initialize WebDriver and open the URL
+        if (WebDriverRunner.getWebDriver() == null) {
+            throw new IllegalStateException("WebDriver is not initialized.");
+        }
+        System.out.println("WebDriver successfully initialized.");
     }
 
     @After
     public void close(Scenario scenario) {
         try {
-            // Захват состояния сценария
             System.out.println(scenario.getName() + " : " + scenario.getStatus());
 
-            // Делаем скриншот, если тест не прошел
+            // Take screenshot if test fails
+            String screenshotName = scenario.getName();
             if (scenario.isFailed()) {
                 final byte[] screenshot = ((TakesScreenshot) WebDriverRunner.getWebDriver())
                         .getScreenshotAs(OutputType.BYTES);
-                scenario.attach(screenshot, "image/png", scenario.getName());
+                scenario.attach(screenshot, "image/png", screenshotName);
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        // Закрываем сессию WebDriver после каждого теста
+        // Close WebDriver only if it was started
         if (WebDriverRunner.hasWebDriverStarted()) {
             Selenide.closeWebDriver();
-            System.out.println("Driver был закрыт.");
-        } else {
-            System.out.println("Сессия WebDriver не была инициализирована.");
         }
+
+        System.out.println("Driver was closed.");
     }
 }
