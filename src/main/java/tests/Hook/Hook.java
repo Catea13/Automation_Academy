@@ -72,6 +72,7 @@ public class Hook {
             Configuration.timeout = 17000; // Время ожидания
             Configuration.reportsFolder = "target/screenshots"; // Папка для отчетов
             Configuration.browserCapabilities = options;
+            options.setExperimentalOption("mobileEmulation", Map.of("deviceName", "Samsung Galaxy A51/71"));
         }
 
     else if (browser.equals("edge")) {
