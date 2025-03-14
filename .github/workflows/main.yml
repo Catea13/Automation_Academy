@@ -31,12 +31,17 @@ jobs:
           # Устанавливаем Google Chrome
           sudo apt-get install -y google-chrome-stable
 
-      - name: Set up WebDriverManager for ChromeDriver
+      - name: Install WebDriverManager via Maven
         run: |
-          # Устанавливаем WebDriverManager
-          curl -sSL https://github.com/bonigarcia/webdrivermanager/releases/download/v5.3.0/webdrivermanager-5.3.0.jar -o webdrivermanager.jar
-          # Запускаем WebDriverManager для установки нужной версии ChromeDriver
-          java -jar webdrivermanager.jar chrome
+          curl -sS https://get.sdkman.io | bash
+          source "$HOME/.sdkman/bin/sdkman-init.sh"
+          sdk install maven
+          mvn dependency:get -Dartifact=com.github.webdriverextensions:webdriverextensions:2.0.0
+          mvn dependency:get -Dartifact=io.github.bonigarcia:webdrivermanager:5.3.0
+
+      - name: Install ChromeDriver with WebDriverManager
+        run: |
+          mvn exec:exec -Dexec.executable="java" -Dexec.args="-cp target/classes:target/dependency/* io.github.bonigarcia.webdrivermanager.WebDriverManager chrome"
 
       - name: Verify ChromeDriver and Google Chrome Installation
         run: |
