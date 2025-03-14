@@ -9,7 +9,7 @@ import io.cucumber.testng.CucumberOptions;
         , plugin = {"io.qameta.allure.cucumber7jvm.AllureCucumber7Jvm"},
 
 
-        tags = "@SignUp"
+        tags = "@missingEmail"
 )
 public class TestRunner extends AbstractTestNGCucumberTests  {
 }
