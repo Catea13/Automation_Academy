@@ -3,10 +3,10 @@ name: Run Cucumber Tests Locally
 on:
   push:
     branches:
-      - main
+      - master  # Используем ветку master
   pull_request:
     branches:
-      - main
+      - master  # Используем ветку master
   workflow_dispatch:  # Добавлено для ручного запуска
 
 jobs:
@@ -23,23 +23,29 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
 
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget curl unzip
+          
+          # Устанавливаем Google Chrome
+          sudo apt-get install -y google-chrome-stable
+          
+          # Устанавливаем ChromeDriver через WebDriverManager (если не был установлен ранее)
+          curl -sS https://chromedriver.storage.googleapis.com/114.0.5735.90/chromedriver_linux64.zip -o chromedriver.zip
+          unzip chromedriver.zip
+          sudo mv chromedriver /usr/local/bin
+          sudo chmod +x /usr/local/bin/chromedriver
+
       - name: Verify ChromeDriver and Google Chrome Installation
         run: |
-          # Проверка, что Google Chrome установлен
+          # Проверяем, что Google Chrome установлен
           google-chrome --version || { echo "Google Chrome is not installed"; exit 1; }
-          
-          # Проверка, что chromedriver установлен
+
+          # Проверяем, что ChromeDriver установлен
           chromedriver --version || { echo "ChromeDriver is not installed"; exit 1; }
 
       - name: Run Cucumber tests with Maven
         run: mvn clean test
         env:
           SELENIDE_URL: "https://www.demoblaze.com/"
-          SELENIDE_CHROME_OPTIONS: |
-            --headless
-            --no-sandbox
-            --disable-dev-shm-usage
-            --window-size=1920x1080
-            --user-data-dir=/tmp/chrome-data-dir  # Ensure a unique user data dir for each test
-          # If using additional environment variables specific to your tests
-          # Add them here
