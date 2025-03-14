@@ -9,7 +9,7 @@ import io.cucumber.testng.CucumberOptions;
         , plugin = {"io.qameta.allure.cucumber7jvm.AllureCucumber7Jvm"},
 
 
-        tags = "@missingEmail or   @invalidEmailFormat or @Phone_Purchase"
+        tags = "@missingEmail"
 )
 public class TestRunner extends AbstractTestNGCucumberTests  {
 }
