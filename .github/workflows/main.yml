@@ -35,3 +35,11 @@ jobs:
         run: mvn clean test
         env:
           SELENIDE_URL: "https://www.demoblaze.com/"
+          SELENIDE_CHROME_OPTIONS: |
+            --headless
+            --no-sandbox
+            --disable-dev-shm-usage
+            --window-size=1920x1080
+            --user-data-dir=/tmp/chrome-data-dir  # Ensure a unique user data dir for each test
+          # If using additional environment variables specific to your tests
+          # Add them here
