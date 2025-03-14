@@ -3,11 +3,11 @@ name: Run Cucumber Tests Locally
 on:
   push:
     branches:
-      - master  # Используем ветку master
+      - master
   pull_request:
     branches:
-      - master  # Используем ветку master
-  workflow_dispatch:  # Добавлено для ручного запуска
+      - master
+  workflow_dispatch:
 
 jobs:
   test:
@@ -23,44 +23,27 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
 
-      - name: Clean project with Maven
-        run: mvn clean  # Добавляем команду для очистки проекта перед сборкой
-
       - name: Install dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y wget curl unzip
-          # Устанавливаем Google Chrome
           sudo apt-get install -y google-chrome-stable
 
       - name: Install WebDriverManager via Maven
-        run: |
-          curl -sS https://get.sdkman.io | bash
-          source "$HOME/.sdkman/bin/sdkman-init.sh"
-          sdk install maven
-          mvn dependency:get -Dartifact=com.github.webdriverextensions:webdriverextensions:2.0.0
-          mvn dependency:get -Dartifact=io.github.bonigarcia:webdrivermanager:5.3.0
+        run: mvn install
 
-      - name: Install ChromeDriver with WebDriverManager
+      - name: Download ChromeDriver manually
         run: |
-          mvn exec:exec -Dexec.executable="java" -Dexec.args="-cp target/classes:target/dependency/* io.github.bonigarcia.webdrivermanager.WebDriverManager chrome"
+          wget https://chromedriver.storage.googleapis.com/114.0.5735.90/chromedriver_linux64.zip
+          unzip chromedriver_linux64.zip
+          sudo mv chromedriver /usr/local/bin/
 
-      - name: Verify Google Chrome Installation
+      - name: Verify ChromeDriver and Google Chrome Installation
         run: |
           google-chrome --version || { echo "Google Chrome is not installed"; exit 1; }
-
-      - name: Verify ChromeDriver Installation
-        run: |
           chromedriver --version || { echo "ChromeDriver is not installed"; exit 1; }
 
       - name: Run Cucumber tests with Maven
-        run: mvn clean test  # Запуск тестов после очистки проекта
+        run: mvn clean test
         env:
-          SELENIDE_URL: "https://www.demoblaze.com/"  # URL для тестов
-          DISPLAY: ":99"  # Для запуска безголового режима на CI
-          
-      - name: Upload test results
-        uses: actions/upload-artifact@v3
-        with:
-          name: cucumber-test-results
-          path: target/cucumber-reports  # Путь к отчетам Cucumber, если вы используете maven-cucumber-reporting
+          SELENIDE_URL: "https://www.demoblaze.com/"
