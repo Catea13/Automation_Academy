@@ -27,12 +27,24 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y wget curl unzip
-          
+
           # Устанавливаем Google Chrome
           sudo apt-get install -y google-chrome-stable
-          
-          # Устанавливаем ChromeDriver через WebDriverManager (если не был установлен ранее)
-          curl -sS https://chromedriver.storage.googleapis.com/114.0.5735.90/chromedriver_linux64.zip -o chromedriver.zip
+
+          # Получаем текущую версию Google Chrome
+          CHROME_VERSION=$(google-chrome --version | awk '{print $3}')
+          echo "Detected Chrome version: $CHROME_VERSION"
+
+          # Получаем основную версию Chrome (например, 114 из 114.0.5735.90)
+          CHROME_MAJOR_VERSION=$(echo $CHROME_VERSION | cut -d'.' -f1)
+          echo "Detected Chrome major version: $CHROME_MAJOR_VERSION"
+
+          # Устанавливаем соответствующую версию ChromeDriver через WebDriverManager
+          # Скачиваем ChromeDriver для соответствующей версии Chrome
+          CHROMEDRIVER_VERSION=$(curl -sS https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_MAJOR_VERSION)
+          echo "Detected ChromeDriver version: $CHROMEDRIVER_VERSION"
+
+          curl -sS https://chromedriver.storage.googleapis.com/$CHROMEDRIVER_VERSION/chromedriver_linux64.zip -o chromedriver.zip
           unzip chromedriver.zip
           sudo mv chromedriver /usr/local/bin
           sudo chmod +x /usr/local/bin/chromedriver
@@ -41,7 +53,6 @@ jobs:
         run: |
           # Проверяем, что Google Chrome установлен
           google-chrome --version || { echo "Google Chrome is not installed"; exit 1; }
-
           # Проверяем, что ChromeDriver установлен
           chromedriver --version || { echo "ChromeDriver is not installed"; exit 1; }
 
