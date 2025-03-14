@@ -31,37 +31,12 @@ jobs:
           # Устанавливаем Google Chrome
           sudo apt-get install -y google-chrome-stable
 
-          # Получаем текущую версию Google Chrome
-          CHROME_VERSION=$(google-chrome --version | awk '{print $3}')
-          echo "Detected Chrome version: $CHROME_VERSION"
-
-          # Получаем основную версию Chrome (например, 114 из 114.0.5735.90)
-          CHROME_MAJOR_VERSION=$(echo $CHROME_VERSION | cut -d'.' -f1)
-          echo "Detected Chrome major version: $CHROME_MAJOR_VERSION"
-
-          # Устанавливаем соответствующую версию ChromeDriver через WebDriverManager
-          CHROMEDRIVER_VERSION=$(curl -sS https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_MAJOR_VERSION)
-          
-          if [ -z "$CHROMEDRIVER_VERSION" ]; then
-            echo "Unable to retrieve ChromeDriver version for Chrome $CHROME_MAJOR_VERSION"
-            exit 1
-          fi
-          
-          echo "Detected ChromeDriver version: $CHROMEDRIVER_VERSION"
-
-          # Загружаем и разархивируем ChromeDriver
-          curl -sS https://chromedriver.storage.googleapis.com/$CHROMEDRIVER_VERSION/chromedriver_linux64.zip -o chromedriver.zip
-          
-          # Проверяем успешность загрузки
-          if [ ! -f chromedriver.zip ]; then
-            echo "Failed to download ChromeDriver"
-            exit 1
-          fi
-
-          # Разархивируем и перемещаем в /usr/local/bin
-          unzip chromedriver.zip
-          sudo mv chromedriver /usr/local/bin
-          sudo chmod +x /usr/local/bin/chromedriver
+      - name: Set up WebDriverManager for ChromeDriver
+        run: |
+          # Устанавливаем WebDriverManager
+          curl -sSL https://github.com/bonigarcia/webdrivermanager/releases/download/v5.3.0/webdrivermanager-5.3.0.jar -o webdrivermanager.jar
+          # Запускаем WebDriverManager для установки нужной версии ChromeDriver
+          java -jar webdrivermanager.jar chrome
 
       - name: Verify ChromeDriver and Google Chrome Installation
         run: |
