@@ -23,11 +23,13 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
 
+      - name: Clean project with Maven
+        run: mvn clean  # Добавляем команду для очистки проекта перед сборкой
+
       - name: Install dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y wget curl unzip
-
           # Устанавливаем Google Chrome
           sudo apt-get install -y google-chrome-stable
 
@@ -43,14 +45,22 @@ jobs:
         run: |
           mvn exec:exec -Dexec.executable="java" -Dexec.args="-cp target/classes:target/dependency/* io.github.bonigarcia.webdrivermanager.WebDriverManager chrome"
 
-      - name: Verify ChromeDriver and Google Chrome Installation
+      - name: Verify Google Chrome Installation
         run: |
-          # Проверяем, что Google Chrome установлен
           google-chrome --version || { echo "Google Chrome is not installed"; exit 1; }
-          # Проверяем, что ChromeDriver установлен
+
+      - name: Verify ChromeDriver Installation
+        run: |
           chromedriver --version || { echo "ChromeDriver is not installed"; exit 1; }
 
       - name: Run Cucumber tests with Maven
-        run: mvn clean test
+        run: mvn clean test  # Запуск тестов после очистки проекта
         env:
-          SELENIDE_URL: "https://www.demoblaze.com/"
+          SELENIDE_URL: "https://www.demoblaze.com/"  # URL для тестов
+          DISPLAY: ":99"  # Для запуска безголового режима на CI
+          
+      - name: Upload test results
+        uses: actions/upload-artifact@v3
+        with:
+          name: cucumber-test-results
+          path: target/cucumber-reports  # Путь к отчетам Cucumber, если вы используете maven-cucumber-reporting
