@@ -40,11 +40,25 @@ jobs:
           echo "Detected Chrome major version: $CHROME_MAJOR_VERSION"
 
           # Устанавливаем соответствующую версию ChromeDriver через WebDriverManager
-          # Вместо использования LATEST_RELEASE_ ... используем корректный способ
-          CHROMEDRIVER_VERSION=$(curl -sS https://chromedriver.storage.googleapis.com/LATEST_RELEASE | awk -F= '{print $2}')
+          CHROMEDRIVER_VERSION=$(curl -sS https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_MAJOR_VERSION)
+          
+          if [ -z "$CHROMEDRIVER_VERSION" ]; then
+            echo "Unable to retrieve ChromeDriver version for Chrome $CHROME_MAJOR_VERSION"
+            exit 1
+          fi
+          
           echo "Detected ChromeDriver version: $CHROMEDRIVER_VERSION"
 
+          # Загружаем и разархивируем ChromeDriver
           curl -sS https://chromedriver.storage.googleapis.com/$CHROMEDRIVER_VERSION/chromedriver_linux64.zip -o chromedriver.zip
+          
+          # Проверяем успешность загрузки
+          if [ ! -f chromedriver.zip ]; then
+            echo "Failed to download ChromeDriver"
+            exit 1
+          fi
+
+          # Разархивируем и перемещаем в /usr/local/bin
           unzip chromedriver.zip
           sudo mv chromedriver /usr/local/bin
           sudo chmod +x /usr/local/bin/chromedriver
